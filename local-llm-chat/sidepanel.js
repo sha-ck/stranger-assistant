@@ -32,9 +32,12 @@ const DEFAULT_SETTINGS = {
 
 let currentSettings = { ...DEFAULT_SETTINGS };
 
-// Track generated replies for the 4 cards
-let generatedReplies = ["", "", "", ""];
+// Track generated replies with metadata for tone and states
+// Structure: [{ text: "", tone: "", loading: false }]
+let generatedReplyItems = [];
 let selectedCardIndex = -1;
+let isGeneratingAll = false;
+let lastGeneratedMessage = ""; // Track what message current replies belong to
 
 const dom = {
   appTitle: document.getElementById("appTitle"),
@@ -62,10 +65,11 @@ const dom = {
   maxSessionMessages: document.getElementById("maxSessionMessages"),
   incomingDisplay: document.getElementById("incomingDisplay"),
   incomingBadge: document.getElementById("incomingBadge"),
-  replyTest: document.getElementById("replyTest"),
-  replyCount: document.getElementById("replyCount"),
+  replyChoicesSection: document.getElementById("replyChoicesSection"),
   replyCardsContainer: document.getElementById("replyCardsContainer"),
+  replyCount: document.getElementById("replyCount"),
   selectedPreview: document.getElementById("selectedPreview"),
+  replyTest: document.getElementById("replyTest"),
   customKeywords: document.getElementById("customKeywords"),
   btnRegenCustom: document.getElementById("btnRegenCustom"),
   btnGenerate: document.getElementById("btnGenerate"),
@@ -179,6 +183,7 @@ function persistSettings(immediate = false) {
     currentSettings.minDelayMs = parseInt(dom.minDelayMs.value, 10) || DEFAULT_SETTINGS.minDelayMs;
     currentSettings.maxDelayMs = parseInt(dom.maxDelayMs.value, 10) || DEFAULT_SETTINGS.maxDelayMs;
     currentSettings.maxSessionMessages = parseInt(dom.maxSessionMessages.value, 10) || DEFAULT_SETTINGS.maxSessionMessages;
+    currentSettings.customKeywords = (dom.customKeywords?.value || "").trim();
 
     // Root mirrors for active profile
     const active = currentSettings.profiles[activeName];
@@ -250,74 +255,172 @@ async function loadSettings() {
     dom.minDelayMs.value = currentSettings.minDelayMs || DEFAULT_SETTINGS.minDelayMs;
     dom.maxDelayMs.value = currentSettings.maxDelayMs || DEFAULT_SETTINGS.maxDelayMs;
     dom.maxSessionMessages.value = currentSettings.maxSessionMessages || DEFAULT_SETTINGS.maxSessionMessages;
+
+    // Restore saved custom keywords if present
+    if (currentSettings.customKeywords && dom.customKeywords) {
+      dom.customKeywords.value = currentSettings.customKeywords;
+    }
   } catch (err) {
     showStatus("Could not load settings: " + err.message, "error");
   }
 }
 
-// ── Reply Cards Logic ──
+// ── Reply Cards Logic & Dynamic Rendering ──
 
-function resetReplyCards() {
-  generatedReplies = ["", "", "", ""];
-  selectedCardIndex = -1;
-  for (let i = 0; i < 4; i++) {
-    const textEl = document.getElementById(`replyText${i}`);
-    textEl.textContent = "—";
-    textEl.classList.add("empty");
-    const card = textEl.closest(".reply-card");
-    card.classList.remove("selected", "loading");
-  }
-  dom.replyCount.textContent = "0 / 4";
-  dom.selectedPreview.style.display = "none";
-  dom.replyTest.value = "";
+function updateReplyCountDisplay() {
+  const validReplies = generatedReplyItems.filter(item => item && item.text && item.text.trim()).length;
+  const isSelected = selectedCardIndex >= 0 && generatedReplyItems[selectedCardIndex]?.text ? 1 : 0;
+  dom.replyCount.textContent = `${isSelected} selected / ${validReplies} available`;
 }
 
-function setCardLoading(index, loading) {
-  const card = document.querySelectorAll(".reply-card")[index];
-  if (loading) {
-    card.classList.add("loading");
+function renderReplyCards() {
+  const container = dom.replyCardsContainer;
+  container.innerHTML = "";
+
+  const hasAnyValidReply = generatedReplyItems.some(item => item && (item.text || item.loading));
+  if (!hasAnyValidReply) {
+    dom.replyChoicesSection.style.display = "none";
+    dom.selectedPreview.style.display = "none";
+    return;
+  }
+
+  dom.replyChoicesSection.style.display = "block";
+
+  generatedReplyItems.forEach((item, index) => {
+    const card = document.createElement("div");
+    card.className = "reply-card";
+    card.dataset.index = index;
+
+    if (item.loading) {
+      card.classList.add("loading");
+    }
+    if (selectedCardIndex === index && !item.loading && item.text) {
+      card.classList.add("selected");
+    }
+
+    const numberSpan = document.createElement("span");
+    numberSpan.className = "card-number";
+    numberSpan.textContent = index + 1;
+
+    const contentArea = document.createElement("div");
+    contentArea.className = "card-content-area";
+
+    const headerMeta = document.createElement("div");
+    headerMeta.className = "card-header-meta";
+
+    const toneTag = document.createElement("span");
+    toneTag.className = "card-tone-tag";
+    toneTag.textContent = item.tone || `Choice ${index + 1}`;
+    headerMeta.appendChild(toneTag);
+
+    const cardText = document.createElement("p");
+    cardText.className = "card-text";
+    cardText.textContent = item.loading ? "Generating reply" : (item.text || "—");
+
+    contentArea.appendChild(headerMeta);
+    contentArea.appendChild(cardText);
+
+    // Actions area: Quick Copy & Individual Regenerate
+    const actionsArea = document.createElement("div");
+    actionsArea.className = "card-actions";
+
+    const btnQuickCopy = document.createElement("button");
+    btnQuickCopy.className = "card-mini-btn";
+    btnQuickCopy.type = "button";
+    btnQuickCopy.title = "Copy reply to clipboard";
+    btnQuickCopy.textContent = "📋";
+    btnQuickCopy.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      if (!item.text) return;
+      try {
+        await navigator.clipboard.writeText(item.text);
+        btnQuickCopy.textContent = "✓";
+        btnQuickCopy.classList.add("copied");
+        showStatus(`Reply #${index + 1} copied to clipboard!`, "success");
+        setTimeout(() => {
+          btnQuickCopy.textContent = "📋";
+          btnQuickCopy.classList.remove("copied");
+        }, 1500);
+      } catch (err) {
+        showStatus("Copy failed: " + err.message, "error");
+      }
+    });
+
+    const btnSingleRegen = document.createElement("button");
+    btnSingleRegen.className = "card-mini-btn";
+    btnSingleRegen.type = "button";
+    btnSingleRegen.title = "Regenerate this specific reply";
+    btnSingleRegen.textContent = "🔄";
+    btnSingleRegen.addEventListener("click", (e) => {
+      e.stopPropagation();
+      regenerateSingleReply(index);
+    });
+
+    actionsArea.appendChild(btnQuickCopy);
+    actionsArea.appendChild(btnSingleRegen);
+
+    card.appendChild(numberSpan);
+    card.appendChild(contentArea);
+    card.appendChild(actionsArea);
+
+    card.addEventListener("click", () => {
+      selectCard(index);
+    });
+
+    container.appendChild(card);
+  });
+
+  updateReplyCountDisplay();
+
+  // If a valid selection is active, sync with preview
+  if (selectedCardIndex >= 0 && generatedReplyItems[selectedCardIndex]?.text) {
+    dom.replyTest.value = generatedReplyItems[selectedCardIndex].text;
+    dom.selectedPreview.style.display = "block";
   } else {
-    card.classList.remove("loading");
+    dom.selectedPreview.style.display = "none";
   }
-}
-
-function setCardText(index, text) {
-  const textEl = document.getElementById(`replyText${index}`);
-  generatedReplies[index] = text;
-  textEl.textContent = text || "—";
-  textEl.classList.toggle("empty", !text);
-
-  // Update counter
-  const filled = generatedReplies.filter(r => r).length;
-  dom.replyCount.textContent = `${filled} / 4`;
 }
 
 function selectCard(index) {
-  if (!generatedReplies[index]) return;
+  if (!generatedReplyItems[index] || !generatedReplyItems[index].text || generatedReplyItems[index].loading) {
+    return;
+  }
 
-  // Deselect previous
-  document.querySelectorAll(".reply-card").forEach(c => c.classList.remove("selected"));
-
-  // Select new
   selectedCardIndex = index;
-  const card = document.querySelectorAll(".reply-card")[index];
-  card.classList.add("selected");
-
-  // Show preview
-  dom.replyTest.value = generatedReplies[index];
-  dom.selectedPreview.style.display = "block";
+  renderReplyCards();
+  showStatus(`Reply #${index + 1} selected.`, "info");
 }
 
-// Card click handlers
-document.querySelectorAll(".reply-card").forEach(card => {
-  card.addEventListener("click", () => {
-    const idx = parseInt(card.getAttribute("data-index"), 10);
-    selectCard(idx);
-  });
-});
+// Compute 4 distinct styles/tones for replies based on primary tone
+function getDistinctTones(baseTone) {
+  const allTones = [
+    "Friendly and casual",
+    "Funny and playful",
+    "Warm and thoughtful",
+    "Short and direct",
+    "Flirty but respectful",
+    "Chill and relaxed"
+  ];
 
-// Generate 4 replies
-async function generateMultipleReplies(extraKeywords) {
+  const primary = baseTone || dom.tone.value || "Friendly and casual";
+  const result = [primary];
+
+  for (const t of allTones) {
+    if (result.length >= 4) break;
+    if (!result.includes(t)) {
+      result.push(t);
+    }
+  }
+
+  while (result.length < 4) {
+    result.push(`Variation ${result.length + 1}`);
+  }
+
+  return result;
+}
+
+// Regenerate one individual reply without disrupting the other three
+async function regenerateSingleReply(index) {
   const incoming = dom.incomingDisplay.value.trim();
   if (!incoming) {
     showStatus("No incoming message to reply to.", "error");
@@ -330,85 +433,173 @@ async function generateMultipleReplies(extraKeywords) {
     return;
   }
 
-  resetReplyCards();
-  dom.btnGenerate.disabled = true;
-  dom.btnGenerate.textContent = "⏳ Generating…";
-  showStatus("Generating 4 reply options via NVIDIA NIM…", "info");
-
-  // Set all cards to loading
-  for (let i = 0; i < 4; i++) setCardLoading(i, true);
-
-  // Fire 4 requests in parallel
-  const tones = [
-    dom.tone.value,
-    "Funny and playful",
-    "Short and direct",
-    "Warm and thoughtful"
-  ];
-
-  // Deduplicate: if user's selected tone already matches one of the fallback tones,
-  // swap in an alternative
-  const allTones = [
-    "Friendly and casual", "Funny and playful", "Warm and thoughtful",
-    "Short and direct", "Flirty but respectful", "Chill and relaxed"
-  ];
-  const usedTones = new Set();
-  const finalTones = [];
-  for (const t of tones) {
-    if (usedTones.has(t)) {
-      // Find an unused tone
-      const alt = allTones.find(a => !usedTones.has(a));
-      if (alt) {
-        finalTones.push(alt);
-        usedTones.add(alt);
-      } else {
-        finalTones.push(t);
-      }
-    } else {
-      finalTones.push(t);
-      usedTones.add(t);
-    }
+  if (isGeneratingAll) {
+    showStatus("Full generation already in progress. Please wait.", "info");
+    return;
   }
 
-  const promises = finalTones.map((tone, i) => {
-    let incomingText = incoming;
-    if (extraKeywords) {
-      incomingText += `\n\n[User wants reply about: ${extraKeywords}]`;
+  const targetItem = generatedReplyItems[index];
+  if (!targetItem) return;
+
+  targetItem.loading = true;
+  renderReplyCards();
+  showStatus(`Regenerating Reply #${index + 1} (${targetItem.tone})…`, "info");
+
+  const keywords = (dom.customKeywords?.value || "").trim();
+
+  try {
+    const res = await chrome.runtime.sendMessage({
+      type: "NIM_GENERATE",
+      incoming: incoming,
+      partner: "Stranger",
+      tone: targetItem.tone,
+      customInstructions: keywords,
+      history: []
+    });
+
+    targetItem.loading = false;
+    if (res && res.ok && res.reply) {
+      targetItem.text = res.reply;
+      if (selectedCardIndex === index) {
+        dom.replyTest.value = res.reply;
+      }
+      showStatus(`Reply #${index + 1} updated!`, "success");
+    } else {
+      showStatus(`Reply #${index + 1} failed: ${res?.error || "Unknown error"}`, "error");
     }
+  } catch (err) {
+    targetItem.loading = false;
+    showStatus(`Failed to regenerate Reply #${index + 1}: ${err.message}`, "error");
+  }
+
+  renderReplyCards();
+}
+
+// Generate or Regenerate all 4 replies
+async function generateMultipleReplies({ isRegeneration = false } = {}) {
+  const incoming = dom.incomingDisplay.value.trim();
+  if (!incoming) {
+    showStatus("No incoming message to reply to. Waiting for incoming chat…", "error");
+    return;
+  }
+
+  const apiKey = dom.apiKey.value.trim();
+  if (!apiKey) {
+    showStatus("Please enter or select an active NVIDIA NIM API key.", "error");
+    return;
+  }
+
+  if (isGeneratingAll) {
+    showStatus("Generation request is already in progress.", "info");
+    return;
+  }
+
+  isGeneratingAll = true;
+  dom.btnGenerate.disabled = true;
+  dom.btnRegenCustom.disabled = true;
+  dom.btnGenerate.textContent = "⏳ Generating…";
+
+  // Automatically read custom keywords from field (never ignored)
+  const keywords = (dom.customKeywords?.value || "").trim();
+
+  // If this is the initial generation or message changed, initialize the items
+  const distinctTones = getDistinctTones(dom.tone.value);
+  const previousReplies = [...generatedReplyItems];
+
+  if (!isRegeneration || generatedReplyItems.length === 0 || lastGeneratedMessage !== incoming) {
+    // Fresh generation: initialize 4 loading slots
+    generatedReplyItems = distinctTones.map(tone => ({
+      text: "",
+      tone: tone,
+      loading: true
+    }));
+    selectedCardIndex = -1;
+  } else {
+    // Regeneration: mark existing cards as loading without wiping text until new results arrive
+    generatedReplyItems = generatedReplyItems.map((item, idx) => ({
+      ...item,
+      tone: item.tone || distinctTones[idx],
+      loading: true
+    }));
+  }
+
+  renderReplyCards();
+  showStatus(
+    keywords 
+      ? `Generating replies with custom instructions ("${keywords}")…` 
+      : "Generating 4 varied replies via NVIDIA NIM…", 
+    "info"
+  );
+
+  // Parallel generation of 4 distinct replies
+  const promises = distinctTones.map((tone, i) => {
     return chrome.runtime.sendMessage({
       type: "NIM_GENERATE",
-      incoming: incomingText,
+      incoming: incoming,
       partner: "Stranger",
       tone: tone,
+      customInstructions: keywords,
       history: []
     }).then(response => {
-      setCardLoading(i, false);
-      if (response && response.ok) {
-        setCardText(i, response.reply);
+      if (response && response.ok && response.reply) {
+        return { index: i, tone, text: response.reply, ok: true };
       } else {
-        setCardText(i, "");
-        console.warn(`Reply ${i + 1} failed:`, response?.error);
+        return { index: i, tone, error: response?.error || "Empty response", ok: false };
       }
     }).catch(err => {
-      setCardLoading(i, false);
-      setCardText(i, "");
-      console.error(`Reply ${i + 1} error:`, err);
+      return { index: i, tone, error: err.message || String(err), ok: false };
     });
   });
 
-  await Promise.allSettled(promises);
+  const results = await Promise.allSettled(promises);
 
+  let successCount = 0;
+  results.forEach((res, i) => {
+    const data = res.value;
+    if (data && data.ok && data.text) {
+      generatedReplyItems[i] = {
+        text: data.text,
+        tone: data.tone,
+        loading: false
+      };
+      successCount++;
+    } else {
+      // If regeneration failed for a card, restore previous valid reply if available
+      const fallbackText = previousReplies[i]?.text || "";
+      generatedReplyItems[i] = {
+        text: fallbackText,
+        tone: distinctTones[i],
+        loading: false
+      };
+      console.warn(`Reply ${i + 1} failed:`, data?.error);
+    }
+  });
+
+  isGeneratingAll = false;
   dom.btnGenerate.disabled = false;
-  dom.btnGenerate.textContent = "⚡ Generate 4 Replies";
+  dom.btnRegenCustom.disabled = false;
+  dom.btnGenerate.textContent = "⚡ Generate Replies";
+  lastGeneratedMessage = incoming;
 
-  const filled = generatedReplies.filter(r => r).length;
-  if (filled > 0) {
-    showStatus(`${filled} of 4 replies generated. Click one to select.`, "success");
-    // Auto-select the first successful one
-    const firstIdx = generatedReplies.findIndex(r => r);
-    if (firstIdx >= 0) selectCard(firstIdx);
+  if (successCount > 0) {
+    // If no card was selected or previous selection was invalid, pick first successful
+    if (selectedCardIndex < 0 || !generatedReplyItems[selectedCardIndex]?.text) {
+      const firstValid = generatedReplyItems.findIndex(r => r.text);
+      if (firstValid >= 0) selectedCardIndex = firstValid;
+    }
+    renderReplyCards();
+    showStatus(`${successCount} of 4 replies ready. Click any card to select or copy directly.`, "success");
   } else {
-    showStatus("All reply generations failed. Check your API key.", "error");
+    // If complete failure, restore previous
+    if (previousReplies.length > 0 && previousReplies.some(r => r.text)) {
+      generatedReplyItems = previousReplies.map(r => ({ ...r, loading: false }));
+      renderReplyCards();
+      showStatus("Regeneration failed; previous replies were preserved. Check your API key.", "error");
+    } else {
+      generatedReplyItems = [];
+      renderReplyCards();
+      showStatus("All reply generations failed. Please verify your API key connection.", "error");
+    }
   }
 }
 
@@ -576,20 +767,29 @@ dom.btnResetPrompt.addEventListener("click", async () => {
   showStatus("Reset persona prompt to default.", "info");
 });
 
-// Generate 4 replies button
+// Primary Generate button (uses incoming text + custom keywords)
 dom.btnGenerate.addEventListener("click", () => {
-  generateMultipleReplies();
+  generateMultipleReplies({ isRegeneration: false });
 });
 
-// Custom keywords re-gen button
+// Regenerate action beside keywords field (uses incoming text + custom keywords)
 dom.btnRegenCustom.addEventListener("click", () => {
-  const keywords = dom.customKeywords.value.trim();
-  if (!keywords) {
-    showStatus("Enter some keywords first (e.g. movies, funny, weekend).", "error");
-    return;
-  }
-  generateMultipleReplies(keywords);
+  generateMultipleReplies({ isRegeneration: true });
 });
+
+// Auto-persist keywords when user types
+if (dom.customKeywords) {
+  dom.customKeywords.addEventListener("input", () => {
+    persistSettings(false);
+  });
+  // Also support pressing Enter in the keywords input to trigger generation
+  dom.customKeywords.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      generateMultipleReplies({ isRegeneration: generatedReplyItems.length > 0 });
+    }
+  });
+}
 
 // Copy button
 dom.btnCopy.addEventListener("click", async () => {
@@ -641,17 +841,31 @@ function addStatusListener() {
       const state = msg.state || msg;
       const incoming = state.incoming || msg.incoming;
       if (incoming && dom.incomingDisplay) {
+        const isNewMessage = dom.incomingDisplay.value !== incoming;
         dom.incomingDisplay.value = incoming;
         // Update badge
         dom.incomingBadge.textContent = "New!";
         dom.incomingBadge.classList.add("active");
-        setTimeout(() => dom.incomingBadge.classList.remove("active"), 3000);
+        setTimeout(() => {
+          if (dom.incomingBadge) dom.incomingBadge.classList.remove("active");
+        }, 3000);
+
+        // If the incoming message changed and differs from what current replies were generated for,
+        // inform user with clear context badge
+        if (isNewMessage && lastGeneratedMessage && lastGeneratedMessage !== incoming) {
+          showStatus("New message received. Ready to generate replies for latest text.", "info");
+        }
       }
       if (state.generated && dom.replyTest) {
-        // If a single auto-generated reply came in, put it in card 0
-        if (!generatedReplies[0]) {
-          setCardText(0, state.generated);
-          selectCard(0);
+        // If an auto-generated reply came in from background watcher, display it if no choices yet
+        if (generatedReplyItems.length === 0) {
+          generatedReplyItems = [{
+            text: state.generated,
+            tone: "Auto-Generated",
+            loading: false
+          }];
+          selectedCardIndex = 0;
+          renderReplyCards();
         }
       }
     }

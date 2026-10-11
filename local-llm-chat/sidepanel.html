@@ -509,28 +509,33 @@
     }
 
     /* ── Reply Cards (iOS Clean Grouped List Style) ── */
+    .reply-cards-wrapper {
+      margin-top: 16px;
+      animation: fadeIn 0.25s ease;
+    }
+
     .reply-cards {
       display: flex;
       flex-direction: column;
-      gap: 7px;
+      gap: 8px;
     }
 
     .reply-card {
       display: flex;
       align-items: flex-start;
-      gap: 11px;
-      padding: 11px 12px;
+      gap: 10px;
+      padding: 10px 12px;
       background: var(--input-bg);
       border: 0.5px solid var(--separator);
       border-radius: var(--radius-sm);
       cursor: pointer;
-      transition: background 0.15s ease, border-color 0.15s ease;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
       position: relative;
     }
 
     .reply-card:hover {
       background: var(--input-bg-focus);
-      border-color: rgba(142, 142, 147, 0.4);
+      border-color: rgba(142, 142, 147, 0.45);
     }
 
     .reply-card.selected {
@@ -539,7 +544,7 @@
     }
 
     .reply-card.loading {
-      opacity: 0.6;
+      opacity: 0.65;
       pointer-events: none;
     }
 
@@ -569,6 +574,7 @@
       font-weight: 600;
       margin-top: 1px;
       border: 0.5px solid var(--separator);
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
     }
 
     .reply-card.selected .card-number {
@@ -577,28 +583,91 @@
       border-color: var(--system-green);
     }
 
+    .card-content-area {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-header-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+
+    .card-tone-tag {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: var(--label-tertiary);
+    }
+
+    .reply-card.selected .card-tone-tag {
+      color: var(--system-green);
+    }
+
     .card-text {
       margin: 0;
       font-size: 13px;
       line-height: 1.42;
       color: var(--label-primary);
       word-break: break-word;
-      flex: 1;
     }
 
-    .card-text.empty {
-      color: var(--label-tertiary);
-      font-style: italic;
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 4px;
+      opacity: 0.7;
+      transition: opacity 0.15s ease;
     }
 
-    .custom-regen {
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 0.5px solid var(--separator);
+    .reply-card:hover .card-actions {
+      opacity: 1;
+    }
+
+    .card-mini-btn {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border-radius: 6px;
+      background: var(--input-bg);
+      border: 0.5px solid var(--separator);
+      color: var(--label-secondary);
+      font-size: 11px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .card-mini-btn:hover {
+      background: var(--input-bg-focus);
+      color: var(--label-primary);
+    }
+
+    .card-mini-btn:active {
+      transform: scale(0.92);
+    }
+
+    .card-mini-btn.copied {
+      background: var(--system-green-soft);
+      color: var(--system-green);
+      border-color: var(--system-green);
+    }
+
+    .keywords-input-row {
+      margin-top: 10px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
     }
 
     .selected-preview {
-      margin-top: 12px;
+      margin-top: 14px;
       padding-top: 12px;
       border-top: 0.5px solid var(--separator);
       animation: fadeIn 0.2s ease;
@@ -648,49 +717,37 @@
       <label class="field-label" for="incomingDisplay">Latest Received Message</label>
       <textarea id="incomingDisplay" placeholder="Waiting for stranger to message…" readonly disabled style="min-height: 52px; opacity: 0.85;"></textarea>
 
-      <button id="btnGenerate" style="margin-top: 12px;">⚡ Generate 4 Replies</button>
-
-      <div class="section-header" style="margin-top: 16px; padding-left: 0; padding-right: 0;">
-        <span>Reply Choices</span>
-        <span class="reply-count" id="replyCount">0 / 4</span>
+      <!-- Custom Tone / Keyword Guidance at the Top -->
+      <label class="field-label" for="customKeywords">Custom Instructions / Keywords</label>
+      <div class="keywords-input-row">
+        <input type="text" id="customKeywords" placeholder="e.g. sarcastic, keep it short, playful">
+        <button id="btnRegenCustom" class="secondary" title="Regenerate replies using current message & instructions" style="width: auto; white-space: nowrap; padding: 8px 12px; font-size: 12px; gap: 4px;">
+          🔄 Regenerate
+        </button>
       </div>
 
-      <!-- 4 Selectable Apple-style Reply Cards -->
-      <div id="replyCardsContainer" class="reply-cards">
-        <div class="reply-card" data-index="0">
-          <span class="card-number">1</span>
-          <p class="card-text empty" id="replyText0">—</p>
-        </div>
-        <div class="reply-card" data-index="1">
-          <span class="card-number">2</span>
-          <p class="card-text empty" id="replyText1">—</p>
-        </div>
-        <div class="reply-card" data-index="2">
-          <span class="card-number">3</span>
-          <p class="card-text empty" id="replyText2">—</p>
-        </div>
-        <div class="reply-card" data-index="3">
-          <span class="card-number">4</span>
-          <p class="card-text empty" id="replyText3">—</p>
-        </div>
-      </div>
+      <!-- Primary Generate Button -->
+      <button id="btnGenerate" style="margin-top: 10px;">⚡ Generate Replies</button>
 
-      <!-- Custom Keyword Guidance Generation -->
-      <div class="custom-regen" id="customRegenSection">
-        <label class="field-label" for="customKeywords" style="margin-top: 0;">Regenerate with Custom Keywords</label>
-        <div class="row" style="gap: 8px; align-items: stretch;">
-          <input type="text" id="customKeywords" placeholder="e.g. sarcastic, movie quote, ask about music" style="flex: 1;">
-          <button id="btnRegenCustom" class="secondary" style="width: auto; white-space: nowrap; padding: 7px 14px;">Re-gen</button>
+      <!-- Reply Choices Container (Displayed ONLY when replies are available) -->
+      <div id="replyChoicesSection" class="reply-cards-wrapper" style="display: none;">
+        <div class="section-header" style="margin-bottom: 8px; padding-left: 0; padding-right: 0;">
+          <span>Reply Choices</span>
+          <span class="reply-count" id="replyCount">0 / 4</span>
         </div>
-      </div>
 
-      <!-- Selected Reply Action Sheet Preview -->
-      <div class="selected-preview" id="selectedPreview" style="display: none;">
-        <label class="field-label" for="replyTest" style="margin-top: 0; color: var(--system-green); font-weight: 600;">Selected Reply for Dispatch</label>
-        <textarea id="replyTest" placeholder="Pick a reply above or refine text here…" style="min-height: 48px;"></textarea>
-        <div class="btn-group" style="margin-top: 8px;">
-          <button id="btnCopy" class="secondary">📋 Copy</button>
-          <button id="btnSendSelected">🚀 Send to Chat</button>
+        <div id="replyCardsContainer" class="reply-cards">
+          <!-- Dynamically populated or rendered reply cards -->
+        </div>
+
+        <!-- Selected Reply Action Sheet Preview -->
+        <div class="selected-preview" id="selectedPreview" style="display: none;">
+          <label class="field-label" for="replyTest" style="margin-top: 0; color: var(--system-green); font-weight: 600;">Selected Reply for Dispatch</label>
+          <textarea id="replyTest" placeholder="Pick a reply above or refine text here…" style="min-height: 48px;"></textarea>
+          <div class="btn-group" style="margin-top: 8px;">
+            <button id="btnCopy" class="secondary">📋 Copy</button>
+            <button id="btnSendSelected">🚀 Send to Chat</button>
+          </div>
         </div>
       </div>
     </div>

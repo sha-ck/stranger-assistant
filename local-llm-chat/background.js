@@ -179,7 +179,7 @@ async function validateApiKey({ apiKey, endpoint, model }) {
 }
 
 // Call NVIDIA NIM API
-async function callNvidiaNim({ incoming, history = [], partner = "stranger", tone }) {
+async function callNvidiaNim({ incoming, history = [], partner = "stranger", tone, customInstructions }) {
   const settings = await getSettings();
   const credentials = resolveActiveCredentials(settings);
 
@@ -215,10 +215,16 @@ async function callNvidiaNim({ incoming, history = [], partner = "stranger", ton
     }
   }
 
-  // Append latest user message with tone context
-  const userContent = 
+  // Append latest user message with tone and custom instructions
+  let userContent = 
     `Partner name: ${partner}\n` +
-    `Tone context: ${selectedTone}\n` +
+    `Tone context: ${selectedTone}\n`;
+
+  if (customInstructions && customInstructions.trim()) {
+    userContent += `User instructions/keywords: Follow this guidance strictly: ${customInstructions.trim()}\n`;
+  }
+
+  userContent += 
     `Stranger: "${incoming}"\n\n` +
     `Draft my short reply:`;
 
