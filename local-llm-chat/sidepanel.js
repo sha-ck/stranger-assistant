@@ -154,9 +154,10 @@ function displayActiveProfile() {
 
 // Save settings to chrome.storage.local
 let saveTimeout = null;
-function persistSettings() {
+function persistSettings(immediate = false) {
   clearTimeout(saveTimeout);
-  saveTimeout = setTimeout(async () => {
+  
+  const doSave = async () => {
     // Sync current UI fields into active profile
     const activeName = currentSettings.activeProfileName;
     if (activeName && currentSettings.profiles[activeName]) {
@@ -192,13 +193,13 @@ function persistSettings() {
     } catch (err) {
       showStatus("Failed to save settings: " + err.message, "error");
     }
-  }, 250);
-}
+  };
 
-// Toggle switch
-function toggleSwitch() {
-  dom.enabled.checked = !dom.enabled.checked;
-  persistSettings();
+  if (immediate) {
+    doSave();
+  } else {
+    saveTimeout = setTimeout(doSave, 250);
+  }
 }
 
 // Load settings from storage
@@ -546,14 +547,25 @@ dom.chips.forEach(chip => {
   });
 });
 
+// Attach auto-save listeners to toggle switches with instant persistence
+[dom.enabled, dom.autoGenerate, dom.autoSend].forEach(toggle => {
+  if (toggle) {
+    toggle.addEventListener("change", () => {
+      persistSettings(true);
+    });
+  }
+});
+
 // Attach auto-save listeners to other form controls
 [
-  dom.enabled, dom.apiKey, dom.endpoint, dom.model, dom.customPrompt, dom.tone,
-  dom.contextTurns, dom.maxChars, dom.autoGenerate, dom.autoSend,
+  dom.apiKey, dom.endpoint, dom.model, dom.customPrompt, dom.tone,
+  dom.contextTurns, dom.maxChars,
   dom.minDelayMs, dom.maxDelayMs, dom.maxSessionMessages
 ].forEach(input => {
-  input.addEventListener("input", persistSettings);
-  input.addEventListener("change", persistSettings);
+  if (input) {
+    input.addEventListener("input", () => persistSettings(false));
+    input.addEventListener("change", () => persistSettings(false));
+  }
 });
 
 // Reset persona prompt button

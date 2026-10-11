@@ -103,13 +103,23 @@
 
     .title-large {
       margin: 0;
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 700;
       letter-spacing: -0.025em;
       color: var(--label-primary);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .app-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+      flex-shrink: 0;
+      object-fit: cover;
     }
 
     .system-badge {
@@ -162,17 +172,24 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      min-height: 32px;
-      gap: 12px;
+      min-height: 34px;
+      gap: 14px;
+      cursor: pointer;
     }
 
-    .ios-switch-row label {
+    .ios-switch-row .switch-info {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ios-switch-row label.switch-text-label {
       margin: 0;
       font-size: 14px;
       font-weight: 500;
       color: var(--label-primary);
       cursor: pointer;
-      flex: 1;
     }
 
     .ios-switch-row .sublabel {
@@ -181,20 +198,28 @@
       font-weight: normal;
       color: var(--label-secondary);
       margin-top: 1px;
+      line-height: 1.35;
     }
 
     .switch-container {
       position: relative;
-      width: 48px;
-      height: 28px;
+      display: inline-block;
+      width: 50px;
+      height: 30px;
       flex-shrink: 0;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .switch-container input[type="checkbox"] {
+      position: absolute;
       opacity: 0;
       width: 0;
       height: 0;
-      position: absolute;
+      margin: 0;
+      padding: 0;
+      pointer-events: none;
     }
 
     .switch-slider {
@@ -205,20 +230,20 @@
       right: 0;
       bottom: 0;
       background-color: var(--system-fill);
-      border-radius: 28px;
+      border-radius: 30px;
       transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .switch-slider::before {
       position: absolute;
       content: "";
-      height: 22px;
-      width: 22px;
+      height: 24px;
+      width: 24px;
       left: 3px;
-      bottom: 3px;
+      top: 3px;
       background-color: #ffffff;
       border-radius: 50%;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28), 0 1px 1px rgba(0, 0, 0, 0.12);
       transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -228,6 +253,15 @@
 
     .switch-container input:checked + .switch-slider::before {
       transform: translateX(20px);
+    }
+
+    .switch-container:active .switch-slider::before {
+      width: 26px;
+    }
+
+    .switch-container input:focus-visible + .switch-slider {
+      outline: 2px solid var(--system-blue);
+      outline-offset: 2px;
     }
 
     /* ── Form Controls & iOS Row Styling ── */
@@ -575,9 +609,10 @@
   <!-- Apple Header -->
   <header class="app-header">
     <div class="app-header-top">
-      <h1 class="title-large" id="appTitle">
-        OmniChat Copilot
-      </h1>
+      <div style="display: flex; align-items: center; gap: 9px; min-width: 0;">
+        <img class="app-icon" src="icons/icon48.png" alt="OmniChat Logo">
+        <h1 class="title-large" id="appTitle">OmniChat Copilot</h1>
+      </div>
       <span class="system-badge">NVIDIA NIM</span>
     </div>
     <p class="system-subtitle" id="appSubtitle">Universal conversational copilot</p>
@@ -587,8 +622,8 @@
   <div class="section-group">
     <div class="inset-card">
       <div class="ios-switch-row">
-        <div>
-          <label for="enabled">Enable Assistant</label>
+        <div class="switch-info">
+          <label class="switch-text-label" for="enabled">Enable Assistant</label>
           <span class="sublabel">Activate active chat observer &amp; suggestions</span>
         </div>
         <label class="switch-container">
@@ -748,14 +783,14 @@
       </div>
 
       <div class="ios-switch-row" style="margin-top: 14px; padding-top: 10px; border-top: 0.5px solid var(--separator);">
-        <div>
-          <label for="autoGenerate">Auto-generate suggestions</label>
+        <div class="switch-info">
+          <label class="switch-text-label" for="autoGenerate">Auto-generate suggestions</label>
           <span class="sublabel">When a new message arrives</span>
         </div>
-        <div class="switch-container">
+        <label class="switch-container">
           <input type="checkbox" id="autoGenerate">
           <span class="switch-slider"></span>
-        </div>
+        </label>
       </div>
     </div>
   </div>
@@ -768,14 +803,14 @@
 
     <div class="inset-card">
       <div class="ios-switch-row">
-        <div>
-          <label for="autoSend">Auto-send suggested reply</label>
+        <div class="switch-info">
+          <label class="switch-text-label" for="autoSend">Auto-send suggested reply</label>
           <span class="sublabel">Automatically dispatches chosen reply</span>
         </div>
-        <div class="switch-container">
+        <label class="switch-container">
           <input type="checkbox" id="autoSend">
           <span class="switch-slider"></span>
-        </div>
+        </label>
       </div>
 
       <div class="row" style="margin-top: 14px;">
