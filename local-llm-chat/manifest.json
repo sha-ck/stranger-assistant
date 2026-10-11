@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "OmniChat AI - Universal Copilot",
+  "version": "2.1.0",
+  "description": "Universal AI chat copilot and autoresponder powered by NVIDIA NIM & LLMs.",
+  "minimum_chrome_version": "116",
+  "permissions": [
+    "sidePanel",
+    "storage",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "https://integrate.api.nvidia.com/*",
+    "http://localhost:11434/*"
+  ],
+  "action": {
+    "default_title": "OmniChat AI Copilot"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ]
+}

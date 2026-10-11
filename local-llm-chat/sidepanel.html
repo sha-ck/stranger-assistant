@@ -1,0 +1,799 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OmniChat Copilot</title>
+  <style>
+    :root {
+      /* Apple iOS System Palette */
+      --system-bg: #000000;
+      --system-grouped-bg: #000000;
+      --card-bg: rgba(28, 28, 30, 0.85);
+      --card-elevated: rgba(44, 44, 46, 0.7);
+      --input-bg: rgba(118, 118, 128, 0.24);
+      --input-bg-focus: rgba(118, 118, 128, 0.32);
+      --separator: rgba(84, 84, 88, 0.36);
+      --separator-opaque: #38383a;
+      
+      /* Typography Colors */
+      --label-primary: #ffffff;
+      --label-secondary: #8e8e93;
+      --label-tertiary: #636366;
+      --label-quaternary: #48484a;
+
+      /* iOS System Colors */
+      --system-blue: #0a84ff;
+      --system-blue-hover: #409cff;
+      --system-green: #30d158;
+      --system-green-soft: rgba(48, 209, 88, 0.15);
+      --system-red: #ff453a;
+      --system-red-soft: rgba(255, 69, 58, 0.15);
+      --system-orange: #ff9f0a;
+      --system-fill: rgba(120, 120, 128, 0.32);
+      
+      --system-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Roboto, sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --system-bg: #f2f2f7;
+        --system-grouped-bg: #f2f2f7;
+        --card-bg: rgba(255, 255, 255, 0.92);
+        --card-elevated: rgba(242, 242, 247, 0.85);
+        --input-bg: rgba(118, 118, 128, 0.12);
+        --input-bg-focus: rgba(118, 118, 128, 0.18);
+        --separator: rgba(60, 60, 67, 0.18);
+        --separator-opaque: #e5e5ea;
+
+        --label-primary: #000000;
+        --label-secondary: #6c6c70;
+        --label-tertiary: #8e8e93;
+        --label-quaternary: #aeaeb2;
+
+        --system-blue: #007aff;
+        --system-blue-hover: #0062cc;
+        --system-green: #34c759;
+        --system-green-soft: rgba(52, 199, 89, 0.15);
+        --system-red: #ff3b30;
+        --system-red-soft: rgba(255, 59, 48, 0.15);
+        --system-fill: rgba(120, 120, 128, 0.16);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      margin: 0;
+      padding: 14px 12px 28px;
+      font-family: var(--system-font);
+      background-color: var(--system-bg);
+      color: var(--label-primary);
+      font-size: 13px;
+      line-height: 1.45;
+      letter-spacing: -0.01em;
+      user-select: none;
+    }
+
+    input, textarea, select {
+      user-select: text;
+    }
+
+    /* ── Apple Navigation Header ── */
+    .app-header {
+      padding: 6px 4px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .app-header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .title-large {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--label-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .system-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: var(--radius-full);
+      background: var(--input-bg);
+      color: var(--label-secondary);
+      letter-spacing: -0.01em;
+      border: 0.5px solid var(--separator);
+    }
+
+    .system-subtitle {
+      font-size: 12px;
+      color: var(--label-secondary);
+      margin: 0;
+    }
+
+    /* ── iOS Inset Grouped Card Section ── */
+    .section-group {
+      margin-bottom: 16px;
+    }
+
+    .section-header {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--label-secondary);
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      padding: 0 8px 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .inset-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border-radius: var(--radius-md);
+      border: 0.5px solid var(--separator);
+      padding: 14px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    /* ── Apple Native Switch (Toggle) ── */
+    .ios-switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 32px;
+      gap: 12px;
+    }
+
+    .ios-switch-row label {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--label-primary);
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .ios-switch-row .sublabel {
+      display: block;
+      font-size: 11px;
+      font-weight: normal;
+      color: var(--label-secondary);
+      margin-top: 1px;
+    }
+
+    .switch-container {
+      position: relative;
+      width: 48px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .switch-container input[type="checkbox"] {
+      opacity: 0;
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+
+    .switch-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--system-fill);
+      border-radius: 28px;
+      transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .switch-slider::before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .switch-container input:checked + .switch-slider {
+      background-color: var(--system-green);
+    }
+
+    .switch-container input:checked + .switch-slider::before {
+      transform: translateX(20px);
+    }
+
+    /* ── Form Controls & iOS Row Styling ── */
+    label.field-label {
+      display: block;
+      margin-top: 12px;
+      margin-bottom: 5px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--label-secondary);
+      letter-spacing: -0.01em;
+    }
+
+    label.field-label:first-of-type {
+      margin-top: 0;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 0.5px solid var(--separator);
+      color: var(--label-primary);
+      border-radius: var(--radius-sm);
+      padding: 9px 11px;
+      font-family: inherit;
+      font-size: 13px;
+      line-height: 1.4;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    select {
+      background-image: url('data:image/svg2+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="%238e8e93" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 28px;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--system-blue);
+      background-color: var(--input-bg-focus);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 64px;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .row > div {
+      flex: 1;
+    }
+
+    /* ── Apple Buttons & Hierarchy ── */
+    button {
+      font-family: var(--system-font);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      background: var(--system-blue);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 9px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      transition: opacity 0.15s ease, background 0.15s ease, transform 0.1s ease;
+      touch-action: manipulation;
+    }
+
+    button:active {
+      transform: scale(0.985);
+      opacity: 0.88;
+    }
+
+    button:hover {
+      background: var(--system-blue-hover);
+    }
+
+    button.secondary {
+      background: var(--input-bg);
+      color: var(--label-primary);
+      border: 0.5px solid var(--separator);
+      font-weight: 500;
+    }
+
+    button.secondary:hover {
+      background: var(--input-bg-focus);
+    }
+
+    button.danger {
+      background: var(--system-red-soft);
+      color: var(--system-red);
+      border: 0.5px solid rgba(255, 69, 58, 0.3);
+      font-weight: 500;
+    }
+
+    button.danger:hover {
+      background: rgba(255, 69, 58, 0.25);
+    }
+
+    button.link-btn {
+      width: auto;
+      background: none;
+      border: none;
+      color: var(--system-blue);
+      padding: 0;
+      margin: 0;
+      font-size: 12px;
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    button.link-btn:hover {
+      text-decoration: underline;
+      background: none;
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .btn-group button {
+      margin-top: 0;
+      padding: 7px 10px;
+      font-size: 12px;
+    }
+
+    /* ── Segmented / Chips Controls ── */
+    .chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .chip-btn {
+      width: auto;
+      margin: 0;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: var(--radius-full);
+      background: var(--input-bg);
+      color: var(--label-secondary);
+      border: 0.5px solid var(--separator);
+    }
+
+    .chip-btn:hover {
+      background: var(--input-bg-focus);
+      color: var(--label-primary);
+    }
+
+    .chip-btn.active {
+      background: var(--label-primary);
+      color: var(--system-bg);
+      border-color: var(--label-primary);
+      font-weight: 600;
+    }
+
+    /* ── Apple-style Status Banners ── */
+    #statusMessage {
+      font-size: 12px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      display: none;
+      word-break: break-word;
+      margin-bottom: 14px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #statusMessage.info {
+      display: block;
+      background: rgba(10, 132, 255, 0.12);
+      color: var(--system-blue);
+      border: 0.5px solid rgba(10, 132, 255, 0.3);
+    }
+
+    #statusMessage.error {
+      display: block;
+      background: var(--system-red-soft);
+      color: var(--system-red);
+      border: 0.5px solid rgba(255, 69, 58, 0.3);
+    }
+
+    #statusMessage.success {
+      display: block;
+      background: var(--system-green-soft);
+      color: var(--system-green);
+      border: 0.5px solid rgba(48, 209, 88, 0.3);
+    }
+
+    /* ── Incoming Message Status Pill ── */
+    .incoming-badge {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      background: var(--input-bg);
+      color: var(--label-secondary);
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .incoming-badge.active {
+      background: rgba(10, 132, 255, 0.18);
+      color: var(--system-blue);
+      font-weight: 600;
+    }
+
+    .reply-count {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      background: var(--input-bg);
+      color: var(--label-secondary);
+      font-weight: 500;
+    }
+
+    /* ── Reply Cards (iOS Clean Grouped List Style) ── */
+    .reply-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .reply-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      padding: 11px 12px;
+      background: var(--input-bg);
+      border: 0.5px solid var(--separator);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+      position: relative;
+    }
+
+    .reply-card:hover {
+      background: var(--input-bg-focus);
+      border-color: rgba(142, 142, 147, 0.4);
+    }
+
+    .reply-card.selected {
+      background: var(--system-green-soft);
+      border-color: var(--system-green);
+    }
+
+    .reply-card.loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .reply-card.loading .card-text::after {
+      content: "…";
+      animation: dots 1s steps(3, end) infinite;
+    }
+
+    @keyframes dots {
+      0% { content: ""; }
+      33% { content: "."; }
+      66% { content: ".."; }
+      100% { content: "..."; }
+    }
+
+    .card-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      border-radius: 50%;
+      background: var(--input-bg);
+      color: var(--label-secondary);
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 1px;
+      border: 0.5px solid var(--separator);
+    }
+
+    .reply-card.selected .card-number {
+      background: var(--system-green);
+      color: #ffffff;
+      border-color: var(--system-green);
+    }
+
+    .card-text {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.42;
+      color: var(--label-primary);
+      word-break: break-word;
+      flex: 1;
+    }
+
+    .card-text.empty {
+      color: var(--label-tertiary);
+      font-style: italic;
+    }
+
+    .custom-regen {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 0.5px solid var(--separator);
+    }
+
+    .selected-preview {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 0.5px solid var(--separator);
+      animation: fadeIn 0.2s ease;
+    }
+  </style>
+</head>
+<body>
+  <!-- Apple Header -->
+  <header class="app-header">
+    <div class="app-header-top">
+      <h1 class="title-large" id="appTitle">
+        OmniChat Copilot
+      </h1>
+      <span class="system-badge">NVIDIA NIM</span>
+    </div>
+    <p class="system-subtitle" id="appSubtitle">Universal conversational copilot</p>
+  </header>
+
+  <!-- Master Controls -->
+  <div class="section-group">
+    <div class="inset-card">
+      <div class="ios-switch-row">
+        <div>
+          <label for="enabled">Enable Assistant</label>
+          <span class="sublabel">Activate active chat observer &amp; suggestions</span>
+        </div>
+        <label class="switch-container">
+          <input type="checkbox" id="enabled">
+          <span class="switch-slider"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Notification -->
+  <div id="statusMessage"></div>
+
+  <!-- Incoming Message + Reply Options Section -->
+  <div class="section-group" id="chatSection">
+    <div class="section-header">
+      <span>Conversation</span>
+      <span class="incoming-badge" id="incomingBadge">Waiting…</span>
+    </div>
+
+    <div class="inset-card">
+      <label class="field-label" for="incomingDisplay">Latest Received Message</label>
+      <textarea id="incomingDisplay" placeholder="Waiting for stranger to message…" readonly disabled style="min-height: 52px; opacity: 0.85;"></textarea>
+
+      <button id="btnGenerate" style="margin-top: 12px;">⚡ Generate 4 Replies</button>
+
+      <div class="section-header" style="margin-top: 16px; padding-left: 0; padding-right: 0;">
+        <span>Reply Choices</span>
+        <span class="reply-count" id="replyCount">0 / 4</span>
+      </div>
+
+      <!-- 4 Selectable Apple-style Reply Cards -->
+      <div id="replyCardsContainer" class="reply-cards">
+        <div class="reply-card" data-index="0">
+          <span class="card-number">1</span>
+          <p class="card-text empty" id="replyText0">—</p>
+        </div>
+        <div class="reply-card" data-index="1">
+          <span class="card-number">2</span>
+          <p class="card-text empty" id="replyText1">—</p>
+        </div>
+        <div class="reply-card" data-index="2">
+          <span class="card-number">3</span>
+          <p class="card-text empty" id="replyText2">—</p>
+        </div>
+        <div class="reply-card" data-index="3">
+          <span class="card-number">4</span>
+          <p class="card-text empty" id="replyText3">—</p>
+        </div>
+      </div>
+
+      <!-- Custom Keyword Guidance Generation -->
+      <div class="custom-regen" id="customRegenSection">
+        <label class="field-label" for="customKeywords" style="margin-top: 0;">Regenerate with Custom Keywords</label>
+        <div class="row" style="gap: 8px; align-items: stretch;">
+          <input type="text" id="customKeywords" placeholder="e.g. sarcastic, movie quote, ask about music" style="flex: 1;">
+          <button id="btnRegenCustom" class="secondary" style="width: auto; white-space: nowrap; padding: 7px 14px;">Re-gen</button>
+        </div>
+      </div>
+
+      <!-- Selected Reply Action Sheet Preview -->
+      <div class="selected-preview" id="selectedPreview" style="display: none;">
+        <label class="field-label" for="replyTest" style="margin-top: 0; color: var(--system-green); font-weight: 600;">Selected Reply for Dispatch</label>
+        <textarea id="replyTest" placeholder="Pick a reply above or refine text here…" style="min-height: 48px;"></textarea>
+        <div class="btn-group" style="margin-top: 8px;">
+          <button id="btnCopy" class="secondary">📋 Copy</button>
+          <button id="btnSendSelected">🚀 Send to Chat</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Named Profiles & Models Group -->
+  <div class="section-group">
+    <div class="section-header">
+      <span>API &amp; Profile Settings</span>
+    </div>
+
+    <div class="inset-card">
+      <label class="field-label" for="profileSelect">Active Profile</label>
+      <select id="profileSelect"></select>
+
+      <div class="btn-group">
+        <button id="btnNewProfile" type="button" class="secondary">+ New</button>
+        <button id="btnSaveProfile" type="button" class="secondary">Save Profile</button>
+        <button id="btnDeleteProfile" type="button" class="danger">Delete</button>
+      </div>
+
+      <label class="field-label" for="profileName" style="margin-top: 12px;">Profile Name</label>
+      <input type="text" id="profileName" placeholder="e.g. Nemotron Primary">
+
+      <label class="field-label" for="apiKey">NVIDIA NIM API Key</label>
+      <div class="row" style="align-items: center; gap: 6px;">
+        <input type="password" id="apiKey" placeholder="nvapi-..." autocomplete="off" style="flex: 1;">
+        <button id="btnToggleKeyVisibility" type="button" class="secondary" style="width: 40px; padding: 8px 0;" title="Toggle key visibility">👁️</button>
+      </div>
+
+      <button id="btnTestKey" type="button" class="secondary" style="margin-top: 8px; font-size: 12px; padding: 7px 10px;">
+        Test Key Connection
+      </button>
+
+      <label class="field-label" style="margin-top: 12px;">Quick Select Model</label>
+      <div class="chips-row">
+        <button type="button" class="chip-btn" data-model="nvidia/nemotron-3-super-120b-a12b">Nemotron 120B</button>
+        <button type="button" class="chip-btn" data-model="meta/llama-3.3-70b-instruct">Llama 3.3 70B</button>
+        <button type="button" class="chip-btn" data-model="meta/llama-3.2-90b-vision-instruct">Llama 3.2 90B</button>
+        <button type="button" class="chip-btn" data-model="mistralai/mixtral-8x22b-instruct-v0.1">Mixtral 8x22B</button>
+      </div>
+
+      <label class="field-label" for="model" style="margin-top: 12px;">Selected Model Tag</label>
+      <input type="text" id="model" value="nvidia/nemotron-3-super-120b-a12b">
+
+      <label class="field-label" for="endpoint">Endpoint URL</label>
+      <input type="text" id="endpoint" value="https://integrate.api.nvidia.com/v1/chat/completions">
+    </div>
+  </div>
+
+  <!-- Persona & System Prompt Group -->
+  <div class="section-group">
+    <div class="section-header">
+      <span>Persona &amp; Instructions</span>
+      <button id="btnResetPrompt" class="link-btn" title="Reset prompt to default">Reset</button>
+    </div>
+
+    <div class="inset-card">
+      <label class="field-label" for="customPrompt">System Prompt</label>
+      <textarea id="customPrompt" style="min-height: 110px; font-size: 12px;"></textarea>
+    </div>
+  </div>
+
+  <!-- Generation & Behavior Group -->
+  <div class="section-group">
+    <div class="section-header">
+      <span>Generation Preferences</span>
+    </div>
+
+    <div class="inset-card">
+      <label class="field-label" for="tone">Tone Style</label>
+      <select id="tone">
+        <option value="Friendly and casual">Friendly and casual</option>
+        <option value="Funny and playful">Funny and playful</option>
+        <option value="Warm and thoughtful">Warm and thoughtful</option>
+        <option value="Short and direct">Short and direct</option>
+        <option value="Flirty but respectful">Flirty but respectful</option>
+        <option value="Chill and relaxed">Chill and relaxed</option>
+      </select>
+
+      <div class="row" style="margin-top: 10px;">
+        <div>
+          <label class="field-label" for="contextTurns">Context Turns</label>
+          <input type="number" id="contextTurns" value="6" min="1" max="20">
+        </div>
+        <div>
+          <label class="field-label" for="maxChars">Max Characters</label>
+          <input type="number" id="maxChars" value="140" min="20" max="500">
+        </div>
+      </div>
+
+      <div class="ios-switch-row" style="margin-top: 14px; padding-top: 10px; border-top: 0.5px solid var(--separator);">
+        <div>
+          <label for="autoGenerate">Auto-generate suggestions</label>
+          <span class="sublabel">When a new message arrives</span>
+        </div>
+        <div class="switch-container">
+          <input type="checkbox" id="autoGenerate">
+          <span class="switch-slider"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Automation & Safety Group -->
+  <div class="section-group">
+    <div class="section-header">
+      <span>Automation &amp; Safety</span>
+    </div>
+
+    <div class="inset-card">
+      <div class="ios-switch-row">
+        <div>
+          <label for="autoSend">Auto-send suggested reply</label>
+          <span class="sublabel">Automatically dispatches chosen reply</span>
+        </div>
+        <div class="switch-container">
+          <input type="checkbox" id="autoSend">
+          <span class="switch-slider"></span>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top: 14px;">
+        <div>
+          <label class="field-label" for="minDelayMs">Min Delay (ms)</label>
+          <input type="number" id="minDelayMs" value="2500" min="500" step="100">
+        </div>
+        <div>
+          <label class="field-label" for="maxDelayMs">Max Delay (ms)</label>
+          <input type="number" id="maxDelayMs" value="6000" min="1000" step="100">
+        </div>
+      </div>
+
+      <label class="field-label" for="maxSessionMessages" style="margin-top: 12px;">Max Messages Per Session</label>
+      <input type="number" id="maxSessionMessages" value="30" min="1" max="100">
+    </div>
+  </div>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>
