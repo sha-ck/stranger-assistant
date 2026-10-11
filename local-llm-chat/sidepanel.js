@@ -553,27 +553,36 @@ async function generateMultipleReplies({ isRegeneration = false } = {}) {
 
   const results = await Promise.allSettled(promises);
 
+  // Build a fresh array to avoid mutating generatedReplyItems during iteration
+  const updatedReplies = distinctTones.map((tone, idx) => ({
+    ...generatedReplyItems[idx],
+    tone,
+    loading: true
+  }));
   let successCount = 0;
-  results.forEach((res, i) => {
+  results.forEach(res => {
     const data = res.value;
     if (data && data.ok && data.text) {
-      generatedReplyItems[i] = {
+      const idx = data.index;
+      updatedReplies[idx] = {
         text: data.text,
         tone: data.tone,
         loading: false
       };
       successCount++;
     } else {
-      // If regeneration failed for a card, restore previous valid reply if available
-      const fallbackText = previousReplies[i]?.text || "";
-      generatedReplyItems[i] = {
+      const idx = data?.index ?? 0;
+      const fallbackText = previousReplies[idx]?.text || "";
+      updatedReplies[idx] = {
         text: fallbackText,
-        tone: distinctTones[i],
+        tone: distinctTones[idx],
         loading: false
       };
-      console.warn(`Reply ${i + 1} failed:`, data?.error);
+      console.warn(`Reply ${idx + 1} failed:`, data?.error);
     }
   });
+  // Replace old items with the updated array
+  generatedReplyItems = updatedReplies;
 
   isGeneratingAll = false;
   dom.btnGenerate.disabled = false;
