@@ -6,6 +6,7 @@
   <title>OmniChat Copilot</title>
   <style>
     :root {
+      color-scheme: dark;
       /* Apple iOS System Palette */
       --system-bg: #000000;
       --system-grouped-bg: #000000;
@@ -41,6 +42,7 @@
 
     @media (prefers-color-scheme: light) {
       :root {
+        color-scheme: light;
         --system-bg: #f2f2f7;
         --system-grouped-bg: #f2f2f7;
         --card-bg: rgba(255, 255, 255, 0.92);
@@ -87,9 +89,18 @@
       user-select: text;
     }
 
+    /* ── Utilities ── */
+    .mt-xs { margin-top: 4px; }
+    .mt-sm { margin-top: 8px; }
+    .mt-md { margin-top: 12px; }
+    .mt-lg { margin-top: 14px; }
+    .pt-sm { padding-top: 8px; }
+    .pt-md { padding-top: 10px; }
+    .border-top { border-top: 0.5px solid var(--separator); }
+
     /* ── Apple Navigation Header ── */
     .app-header {
-      padding: 6px 4px 16px;
+      padding: 6px 4px 14px;
       display: flex;
       flex-direction: column;
       gap: 2px;
@@ -103,7 +114,7 @@
 
     .title-large {
       margin: 0;
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 700;
       letter-spacing: -0.025em;
       color: var(--label-primary);
@@ -139,17 +150,17 @@
       margin: 0;
     }
 
-    /* ── iOS Inset Grouped Card Section ── */
+    /* ── Section & Inset Grouped Card ── */
     .section-group {
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .section-header {
-      font-size: 12px;
-      font-weight: 500;
+      font-size: 11.5px;
+      font-weight: 600;
       color: var(--label-secondary);
       text-transform: uppercase;
-      letter-spacing: -0.01em;
+      letter-spacing: 0.02em;
       padding: 0 8px 6px;
       display: flex;
       align-items: center;
@@ -165,6 +176,77 @@
       padding: 14px;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
       overflow: hidden;
+    }
+
+    /* ── Collapsible Details / Accordions ── */
+    details.settings-accordion {
+      margin-bottom: 14px;
+      border: 0.5px solid var(--separator);
+      border-radius: var(--radius-md);
+      background: var(--card-bg);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      transition: border-color 0.2s ease;
+    }
+
+    details.settings-accordion[open] {
+      border-color: rgba(142, 142, 147, 0.45);
+    }
+
+    details.settings-accordion > summary.accordion-summary {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--label-primary);
+      text-transform: none;
+      letter-spacing: -0.01em;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+      list-style: none;
+      transition: background-color 0.15s ease;
+    }
+
+    details.settings-accordion > summary.accordion-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details.settings-accordion > summary.accordion-summary:hover {
+      background-color: var(--input-bg);
+    }
+
+    .accordion-summary-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .accordion-summary-icon {
+      font-size: 14px;
+    }
+
+    .accordion-chevron {
+      width: 8px;
+      height: 8px;
+      border-right: 2px solid var(--label-secondary);
+      border-bottom: 2px solid var(--label-secondary);
+      transform: rotate(-45deg);
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      flex-shrink: 0;
+    }
+
+    details.settings-accordion[open] > summary .accordion-chevron {
+      transform: rotate(45deg);
+    }
+
+    .accordion-body {
+      padding: 0 14px 14px;
+      border-top: 0.5px solid var(--separator);
+      animation: fadeIn 0.2s ease;
     }
 
     /* ── Apple Native Switch (Toggle) ── */
@@ -186,7 +268,7 @@
 
     .ios-switch-row label.switch-text-label {
       margin: 0;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 500;
       color: var(--label-primary);
       cursor: pointer;
@@ -204,8 +286,8 @@
     .switch-container {
       position: relative;
       display: inline-block;
-      width: 50px;
-      height: 30px;
+      width: 48px;
+      height: 28px;
       flex-shrink: 0;
       cursor: pointer;
       user-select: none;
@@ -237,8 +319,8 @@
     .switch-slider::before {
       position: absolute;
       content: "";
-      height: 24px;
-      width: 24px;
+      height: 22px;
+      width: 22px;
       left: 3px;
       top: 3px;
       background-color: #ffffff;
@@ -256,7 +338,7 @@
     }
 
     .switch-container:active .switch-slider::before {
-      width: 26px;
+      width: 24px;
     }
 
     .switch-container input:focus-visible + .switch-slider {
@@ -269,7 +351,7 @@
       display: block;
       margin-top: 12px;
       margin-bottom: 5px;
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 500;
       color: var(--label-secondary);
       letter-spacing: -0.01em;
@@ -298,17 +380,44 @@
       appearance: none;
     }
 
+    /* Fixed valid SVG Data URI for dropdown chevron */
     select {
-      background-image: url('data:image/svg2+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="%238e8e93" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="%238e8e93" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
       background-repeat: no-repeat;
       background-position: right 10px center;
       padding-right: 28px;
+      cursor: pointer;
+      color-scheme: dark;
+    }
+
+    select option,
+    select optgroup {
+      background-color: #1c1c1e;
+      color: #ffffff;
+      padding: 8px 10px;
+      font-size: 13px;
+    }
+
+    @media (prefers-color-scheme: light) {
+      select {
+        color-scheme: light;
+      }
+      select option,
+      select optgroup {
+        background-color: #ffffff;
+        color: #000000;
+      }
     }
 
     input:focus, select:focus, textarea:focus {
       outline: none;
       border-color: var(--system-blue);
       background-color: var(--input-bg-focus);
+    }
+
+    input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: 2px solid var(--system-blue);
+      outline-offset: 1px;
     }
 
     textarea {
@@ -344,6 +453,11 @@
       cursor: pointer;
       transition: opacity 0.15s ease, background 0.15s ease, transform 0.1s ease;
       touch-action: manipulation;
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--system-blue);
+      outline-offset: 2px;
     }
 
     button:active {
@@ -508,9 +622,64 @@
       font-weight: 500;
     }
 
+    /* ── Empty State ── */
+    .empty-state {
+      text-align: center;
+      padding: 24px 16px 12px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .empty-state-icon {
+      font-size: 30px;
+      margin-bottom: 8px;
+      opacity: 0.7;
+    }
+
+    .empty-state-title {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--label-primary);
+      margin: 0 0 4px;
+    }
+
+    .empty-state-desc {
+      font-size: 11.5px;
+      color: var(--label-secondary);
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    /* ── Skeleton Shimmer Loader ── */
+    .skeleton-pulse {
+      background: linear-gradient(
+        90deg,
+        var(--input-bg) 0%,
+        var(--card-elevated) 50%,
+        var(--input-bg) 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.5s ease infinite;
+      border-radius: 4px;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .skeleton-line {
+      height: 11px;
+      margin-bottom: 7px;
+      border-radius: 3px;
+    }
+
+    .skeleton-line:last-child {
+      margin-bottom: 0;
+    }
+
     /* ── Reply Cards (iOS Clean Grouped List Style) ── */
     .reply-cards-wrapper {
-      margin-top: 16px;
+      margin-top: 14px;
       animation: fadeIn 0.25s ease;
     }
 
@@ -541,23 +710,6 @@
     .reply-card.selected {
       background: var(--system-green-soft);
       border-color: var(--system-green);
-    }
-
-    .reply-card.loading {
-      opacity: 0.65;
-      pointer-events: none;
-    }
-
-    .reply-card.loading .card-text::after {
-      content: "…";
-      animation: dots 1s steps(3, end) infinite;
-    }
-
-    @keyframes dots {
-      0% { content: ""; }
-      33% { content: "."; }
-      66% { content: ".."; }
-      100% { content: "..."; }
     }
 
     .card-number {
@@ -660,7 +812,7 @@
     }
 
     .keywords-input-row {
-      margin-top: 10px;
+      margin-top: 8px;
       display: flex;
       gap: 6px;
       align-items: center;
@@ -672,6 +824,383 @@
       border-top: 0.5px solid var(--separator);
       animation: fadeIn 0.2s ease;
     }
+
+    /* ── Native Confirm Dialog ── */
+    dialog.confirm-dialog {
+      background: var(--card-bg);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 0.5px solid var(--separator);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      color: var(--label-primary);
+      max-width: 310px;
+      width: 90%;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+      margin: auto;
+    }
+
+    dialog.confirm-dialog::backdrop {
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+    }
+
+    .dialog-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0 0 6px;
+    }
+
+    .dialog-body {
+      font-size: 12.5px;
+      color: var(--label-secondary);
+      margin: 0 0 18px;
+      line-height: 1.45;
+    }
+
+    .dialog-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dialog-actions button {
+      flex: 1;
+    }
+
+    /* ── Global API Connection Status Button & Navigation ── */
+    .header-nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .api-status-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px 3px 9px;
+      height: 25px;
+      width: auto;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.03) 100%), var(--card-elevated);
+      color: var(--label-primary);
+      box-shadow: 0 1.5px 4px rgba(0, 0, 0, 0.35), inset 0 0.5px 0.5px rgba(255, 255, 255, 0.2);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .api-status-btn:hover {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.08) 100%), var(--input-bg-focus);
+      border-color: rgba(255, 255, 255, 0.32);
+      transform: translateY(-0.5px);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45), inset 0 0.5px 0.5px rgba(255, 255, 255, 0.25);
+    }
+
+    .api-status-btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .api-status-chevron {
+      font-size: 8.5px;
+      line-height: 1;
+      opacity: 0.75;
+      margin-left: 2px;
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+    }
+
+    .api-status-btn:hover .api-status-chevron {
+      opacity: 1;
+      transform: translateY(1px);
+    }
+
+    .status-indicator-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    /* Status Indicator Colors */
+    /* Green: Connected and validated */
+    .api-status-btn.status-green {
+      background: linear-gradient(180deg, rgba(48, 209, 88, 0.25) 0%, rgba(48, 209, 88, 0.12) 100%), var(--card-elevated);
+      border-color: rgba(48, 209, 88, 0.45);
+      color: var(--system-green);
+    }
+    .api-status-btn.status-green .status-indicator-dot {
+      background: var(--system-green);
+      box-shadow: 0 0 6px rgba(48, 209, 88, 0.6);
+    }
+
+    /* Yellow: Validating or connecting */
+    .api-status-btn.status-yellow {
+      background: linear-gradient(180deg, rgba(255, 159, 10, 0.25) 0%, rgba(255, 159, 10, 0.12) 100%), var(--card-elevated);
+      border-color: rgba(255, 159, 10, 0.45);
+      color: var(--system-orange);
+    }
+    .api-status-btn.status-yellow .status-indicator-dot {
+      background: var(--system-orange);
+      box-shadow: 0 0 6px rgba(255, 159, 10, 0.6);
+      animation: statusPulse 1.2s infinite ease-in-out;
+    }
+
+    /* Red: Missing, invalid, or connection failed */
+    .api-status-btn.status-red {
+      background: linear-gradient(180deg, rgba(255, 69, 58, 0.25) 0%, rgba(255, 69, 58, 0.12) 100%), var(--card-elevated);
+      border-color: rgba(255, 69, 58, 0.45);
+      color: var(--system-red);
+    }
+    .api-status-btn.status-red .status-indicator-dot {
+      background: var(--system-red);
+      box-shadow: 0 0 6px rgba(255, 69, 58, 0.6);
+    }
+
+    /* Gray: Not configured or status unknown */
+    .api-status-btn.status-gray {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.03) 100%), var(--input-bg);
+      border-color: rgba(255, 255, 255, 0.18);
+      color: var(--label-secondary);
+    }
+    .api-status-btn.status-gray .status-indicator-dot {
+      background: var(--label-tertiary);
+    }
+
+    @media (prefers-color-scheme: light) {
+      .api-status-btn {
+        border-color: rgba(0, 0, 0, 0.15);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 240, 245, 0.85) 100%);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), inset 0 0.5px 0.5px rgba(255, 255, 255, 0.8);
+      }
+    }
+
+    @keyframes statusPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.6; }
+    }
+
+    /* ── Editable Message Input Header Actions ── */
+    .message-input-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .message-input-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── API Configuration Popup Dialog ── */
+    dialog.api-dialog {
+      background: var(--card-bg);
+      backdrop-filter: blur(35px);
+      -webkit-backdrop-filter: blur(35px);
+      border: 0.5px solid var(--separator);
+      border-radius: var(--radius-lg);
+      padding: 0;
+      color: var(--label-primary);
+      max-width: 340px;
+      width: 92%;
+      box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45);
+      margin: auto;
+      overflow: hidden;
+    }
+
+    dialog.api-dialog::backdrop {
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+    }
+
+    .api-dialog-card {
+      padding: 16px 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .api-dialog-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .api-dialog-title-group {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .api-dialog-icon {
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--input-bg);
+      border: 0.5px solid var(--separator);
+    }
+
+    .api-dialog-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .api-dialog-subtitle {
+      font-size: 11.5px;
+      color: var(--label-secondary);
+      margin: 1px 0 0;
+    }
+
+    .dialog-close-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--input-bg);
+      border: 0.5px solid var(--separator);
+      color: var(--label-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .dialog-close-btn:hover {
+      background: var(--input-bg-focus);
+      color: var(--label-primary);
+    }
+
+    .popup-status-banner {
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 0.5px solid var(--separator);
+      transition: all 0.25s ease;
+    }
+
+    .popup-status-banner.status-green {
+      background: var(--system-green-soft);
+      border-color: rgba(48, 209, 88, 0.35);
+    }
+    .popup-status-banner.status-yellow {
+      background: rgba(255, 159, 10, 0.14);
+      border-color: rgba(255, 159, 10, 0.35);
+    }
+    .popup-status-banner.status-red {
+      background: var(--system-red-soft);
+      border-color: rgba(255, 69, 58, 0.35);
+    }
+    .popup-status-banner.status-gray {
+      background: var(--input-bg);
+      border-color: var(--separator);
+    }
+
+    .popup-status-top {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .popup-status-title {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .popup-status-desc {
+      font-size: 11px;
+      margin: 3px 0 0 14px;
+      color: var(--label-secondary);
+      line-height: 1.35;
+      word-break: break-word;
+    }
+
+    .popup-connection-details {
+      background: var(--input-bg);
+      border: 0.5px solid var(--separator);
+      border-radius: var(--radius-sm);
+      padding: 7px 10px;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .detail-label {
+      color: var(--label-secondary);
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .detail-value {
+      color: var(--label-primary);
+      font-family: monospace;
+      font-size: 10.5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 190px;
+    }
+
+    .popup-feedback {
+      font-size: 11.5px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      margin-top: 10px;
+      line-height: 1.4;
+      word-break: break-word;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .popup-feedback.success {
+      background: var(--system-green-soft);
+      border: 0.5px solid rgba(48, 209, 88, 0.3);
+      color: var(--system-green);
+    }
+
+    .popup-feedback.error {
+      background: var(--system-red-soft);
+      border: 0.5px solid rgba(255, 69, 58, 0.3);
+      color: var(--system-red);
+    }
+
+    .popup-feedback.info {
+      background: rgba(10, 132, 255, 0.12);
+      border: 0.5px solid rgba(10, 132, 255, 0.3);
+      color: var(--system-blue);
+    }
+
+    /* ── Motion Accessibility ── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -682,210 +1211,353 @@
         <img class="app-icon" src="icons/icon48.png" alt="OmniChat Logo">
         <h1 class="title-large" id="appTitle">OmniChat Copilot</h1>
       </div>
-      <span class="system-badge">NVIDIA NIM</span>
+      <div class="header-nav-actions">
+        <!-- Global API Connection Button -->
+        <button id="btnGlobalApiStatus" type="button" class="api-status-btn status-gray" aria-label="API Connection Status: Not Configured" title="API Connection: Click to configure API key">
+          <span class="status-indicator-dot" id="apiStatusDot"></span>
+          <span class="api-status-label" id="apiStatusLabel">Checking…</span>
+          <span class="api-status-chevron" aria-hidden="true">▾</span>
+        </button>
+        <span class="system-badge" id="providerBadge">NVIDIA NIM</span>
+      </div>
     </div>
     <p class="system-subtitle" id="appSubtitle">Universal conversational copilot</p>
   </header>
 
-  <!-- Master Controls -->
-  <div class="section-group">
-    <div class="inset-card">
-      <div class="ios-switch-row">
-        <div class="switch-info">
-          <label class="switch-text-label" for="enabled">Enable Assistant</label>
-          <span class="sublabel">Activate active chat observer &amp; suggestions</span>
+  <main id="main-content">
+    <!-- Master Switch Control -->
+    <section class="section-group" aria-label="Master Controls">
+      <div class="inset-card">
+        <div class="ios-switch-row">
+          <div class="switch-info">
+            <label class="switch-text-label" for="enabled">Enable Assistant</label>
+            <span class="sublabel">Activate active chat observer &amp; suggestions</span>
+          </div>
+          <label class="switch-container">
+            <input type="checkbox" id="enabled">
+            <span class="switch-slider"></span>
+          </label>
         </div>
-        <label class="switch-container">
-          <input type="checkbox" id="enabled">
-          <span class="switch-slider"></span>
-        </label>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- Status Notification -->
-  <div id="statusMessage"></div>
+    <!-- Status Notification -->
+    <div id="statusMessage" role="status" aria-live="polite"></div>
 
-  <!-- Incoming Message + Reply Options Section -->
-  <div class="section-group" id="chatSection">
-    <div class="section-header">
-      <span>Conversation</span>
-      <span class="incoming-badge" id="incomingBadge">Waiting…</span>
-    </div>
-
-    <div class="inset-card">
-      <label class="field-label" for="incomingDisplay">Latest Received Message</label>
-      <textarea id="incomingDisplay" placeholder="Waiting for stranger to message…" readonly disabled style="min-height: 52px; opacity: 0.85;"></textarea>
-
-      <!-- Custom Tone / Keyword Guidance at the Top -->
-      <label class="field-label" for="customKeywords">Custom Instructions / Keywords</label>
-      <div class="keywords-input-row">
-        <input type="text" id="customKeywords" placeholder="e.g. sarcastic, keep it short, playful">
-        <button id="btnRegenCustom" class="secondary" title="Regenerate replies using current message & instructions" style="width: auto; white-space: nowrap; padding: 8px 12px; font-size: 12px; gap: 4px;">
-          🔄 Regenerate
-        </button>
+    <!-- Active Conversation + Generation Section (Always Primary) -->
+    <section class="section-group" id="chatSection" aria-label="Conversation">
+      <div class="section-header">
+        <span>Conversation</span>
+        <span class="incoming-badge" id="incomingBadge">Waiting…</span>
       </div>
 
-      <!-- Primary Generate Button -->
-      <button id="btnGenerate" style="margin-top: 10px;">⚡ Generate Replies</button>
+      <div class="inset-card">
+        <div class="message-input-header">
+          <label class="field-label" for="incomingDisplay" style="margin: 0;">Message to Reply To</label>
+          <div class="message-input-actions">
+            <button id="btnPasteIncoming" type="button" class="link-btn" title="Paste text from clipboard" style="font-size: 11px;">📋 Paste</button>
+            <span style="color: var(--separator); font-size: 11px;">•</span>
+            <button id="btnClearIncoming" type="button" class="link-btn" title="Clear message input" style="font-size: 11px; color: var(--label-secondary);">✕ Clear</button>
+          </div>
+        </div>
+        <textarea id="incomingDisplay" placeholder="Type, paste, or wait for stranger's message…" style="min-height: 60px;"></textarea>
 
-      <!-- Reply Choices Container (Displayed ONLY when replies are available) -->
-      <div id="replyChoicesSection" class="reply-cards-wrapper" style="display: none;">
-        <div class="section-header" style="margin-bottom: 8px; padding-left: 0; padding-right: 0;">
-          <span>Reply Choices</span>
-          <span class="reply-count" id="replyCount">0 / 4</span>
+        <!-- Custom Tone / Keyword Guidance -->
+        <label class="field-label" for="customKeywords" class="mt-md">Custom Instructions / Keywords</label>
+        <div class="keywords-input-row">
+          <input type="text" id="customKeywords" placeholder="e.g. sarcastic, keep it short, playful">
+          <button id="btnRegenCustom" type="button" class="secondary" title="Regenerate replies using current message &amp; instructions" style="width: auto; white-space: nowrap; padding: 8px 12px; font-size: 12px; gap: 4px;">
+            🔄 Regenerate
+          </button>
         </div>
 
-        <div id="replyCardsContainer" class="reply-cards">
-          <!-- Dynamically populated or rendered reply cards -->
+        <!-- Primary Generate Button -->
+        <button id="btnGenerate" type="button" class="mt-md">⚡ Generate Replies</button>
+
+        <!-- Empty State (When no replies exist) -->
+        <div id="emptyState" class="empty-state">
+          <div class="empty-state-icon" aria-hidden="true">💬</div>
+          <p class="empty-state-title">No replies generated yet</p>
+          <p class="empty-state-desc">When a message arrives, click "Generate Replies" to draft contextual options.</p>
         </div>
 
-        <!-- Selected Reply Action Sheet Preview -->
-        <div class="selected-preview" id="selectedPreview" style="display: none;">
-          <label class="field-label" for="replyTest" style="margin-top: 0; color: var(--system-green); font-weight: 600;">Selected Reply for Dispatch</label>
-          <textarea id="replyTest" placeholder="Pick a reply above or refine text here…" style="min-height: 48px;"></textarea>
-          <div class="btn-group" style="margin-top: 8px;">
-            <button id="btnCopy" class="secondary">📋 Copy</button>
-            <button id="btnSendSelected">🚀 Send to Chat</button>
+        <!-- Reply Choices Container -->
+        <div id="replyChoicesSection" class="reply-cards-wrapper" style="display: none;">
+          <div class="section-header" style="margin-bottom: 8px; padding-left: 0; padding-right: 0;">
+            <span>Reply Choices</span>
+            <span class="reply-count" id="replyCount">0 / 4</span>
+          </div>
+
+          <div id="replyCardsContainer" class="reply-cards">
+            <!-- Dynamically populated reply / skeleton cards -->
+          </div>
+
+          <!-- Selected Reply Action Sheet Preview -->
+          <div class="selected-preview" id="selectedPreview" style="display: none;">
+            <label class="field-label" for="replyTest" style="margin-top: 0; color: var(--system-green); font-weight: 600;">Selected Reply for Dispatch</label>
+            <textarea id="replyTest" placeholder="Pick a reply above or refine text here…" style="min-height: 48px;"></textarea>
+            <div class="btn-group mt-sm">
+              <button id="btnCopy" type="button" class="secondary">📋 Copy</button>
+              <button id="btnSendSelected" type="button">🚀 Send to Chat</button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- Named Profiles & Models Group -->
-  <div class="section-group">
-    <div class="section-header">
-      <span>API &amp; Profile Settings</span>
-    </div>
+    <!-- Collapsible Settings Accordions -->
 
-    <div class="inset-card">
-      <label class="field-label" for="profileSelect">Active Profile</label>
-      <select id="profileSelect"></select>
-
-      <div class="btn-group">
-        <button id="btnNewProfile" type="button" class="secondary">+ New</button>
-        <button id="btnSaveProfile" type="button" class="secondary">Save Profile</button>
-        <button id="btnDeleteProfile" type="button" class="danger">Delete</button>
-      </div>
-
-      <label class="field-label" for="profileName" style="margin-top: 12px;">Profile Name</label>
-      <input type="text" id="profileName" placeholder="e.g. Nemotron Primary">
-
-      <label class="field-label" for="apiKey">NVIDIA NIM API Key</label>
-      <div class="row" style="align-items: center; gap: 6px;">
-        <input type="password" id="apiKey" placeholder="nvapi-..." autocomplete="off" style="flex: 1;">
-        <button id="btnToggleKeyVisibility" type="button" class="secondary" style="width: 40px; padding: 8px 0;" title="Toggle key visibility">👁️</button>
-      </div>
-
-      <button id="btnTestKey" type="button" class="secondary" style="margin-top: 8px; font-size: 12px; padding: 7px 10px;">
-        Test Key Connection
-      </button>
-
-      <label class="field-label" style="margin-top: 12px;">Quick Select Model</label>
-      <div class="chips-row">
-        <button type="button" class="chip-btn" data-model="nvidia/nemotron-3-super-120b-a12b">Nemotron 120B</button>
-        <button type="button" class="chip-btn" data-model="meta/llama-3.3-70b-instruct">Llama 3.3 70B</button>
-        <button type="button" class="chip-btn" data-model="meta/llama-3.2-90b-vision-instruct">Llama 3.2 90B</button>
-        <button type="button" class="chip-btn" data-model="mistralai/mixtral-8x22b-instruct-v0.1">Mixtral 8x22B</button>
-      </div>
-
-      <label class="field-label" for="model" style="margin-top: 12px;">Selected Model Tag</label>
-      <input type="text" id="model" value="nvidia/nemotron-3-super-120b-a12b">
-
-      <label class="field-label" for="endpoint">Endpoint URL</label>
-      <input type="text" id="endpoint" value="https://integrate.api.nvidia.com/v1/chat/completions">
-    </div>
-  </div>
-
-  <!-- Persona & System Prompt Group -->
-  <div class="section-group">
-    <div class="section-header">
-      <span>Persona &amp; Instructions</span>
-      <button id="btnResetPrompt" class="link-btn" title="Reset prompt to default">Reset</button>
-    </div>
-
-    <div class="inset-card">
-      <label class="field-label" for="customPrompt">System Prompt</label>
-      <textarea id="customPrompt" style="min-height: 110px; font-size: 12px;"></textarea>
-    </div>
-  </div>
-
-  <!-- Generation & Behavior Group -->
-  <div class="section-group">
-    <div class="section-header">
-      <span>Generation Preferences</span>
-    </div>
-
-    <div class="inset-card">
-      <label class="field-label" for="tone">Tone Style</label>
-      <select id="tone">
-        <option value="Friendly and casual">Friendly and casual</option>
-        <option value="Funny and playful">Funny and playful</option>
-        <option value="Warm and thoughtful">Warm and thoughtful</option>
-        <option value="Short and direct">Short and direct</option>
-        <option value="Flirty but respectful">Flirty but respectful</option>
-        <option value="Chill and relaxed">Chill and relaxed</option>
-      </select>
-
-      <div class="row" style="margin-top: 10px;">
-        <div>
-          <label class="field-label" for="contextTurns">Context Turns</label>
-          <input type="number" id="contextTurns" value="6" min="1" max="20">
+    <!-- 1. Profile & Model Settings -->
+    <details class="settings-accordion" id="secProfileSettings">
+      <summary class="accordion-summary">
+        <div class="accordion-summary-content">
+          <span class="accordion-summary-icon">👤</span>
+          <span>Profile &amp; Model Settings</span>
         </div>
-        <div>
-          <label class="field-label" for="maxChars">Max Characters</label>
-          <input type="number" id="maxChars" value="140" min="20" max="500">
+        <span class="accordion-chevron"></span>
+      </summary>
+      <div class="accordion-body">
+        <label class="field-label" for="profileSelect">Active Profile</label>
+        <select id="profileSelect"></select>
+
+        <div class="btn-group mt-sm">
+          <button id="btnNewProfile" type="button" class="secondary">+ New</button>
+          <button id="btnSaveProfile" type="button" class="secondary">Save Profile</button>
+          <button id="btnDeleteProfile" type="button" class="danger">Delete</button>
         </div>
+
+        <label class="field-label" for="profileName" class="mt-md">Profile Name</label>
+        <input type="text" id="profileName" placeholder="e.g. Gemini Primary">
+
+        <label class="field-label" for="providerSelect" class="mt-md">AI Provider</label>
+        <select id="providerSelect">
+          <option value="nvidia">NVIDIA NIM (Default)</option>
+          <option value="ollama">Ollama (Local: 127.0.0.1:11434)</option>
+          <option value="openai">OpenAI</option>
+          <option value="google">Google AI Studio (Gemini)</option>
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="groq">Groq (Ultra-fast)</option>
+          <option value="openrouter">OpenRouter</option>
+          <option value="custom">Custom / Local (LM Studio, etc.)</option>
+        </select>
+
+        <label class="field-label" for="modelSelect" class="mt-md">Model</label>
+        <select id="modelSelect">
+          <!-- Dynamically rendered based on active provider presets -->
+        </select>
+
+        <label class="field-label" for="model" class="mt-md">Selected Model Tag</label>
+        <input type="text" id="model" value="nvidia/nemotron-3-super-120b-a12b">
+
+        <label class="field-label" for="endpoint" class="mt-md">Endpoint URL</label>
+        <input type="text" id="endpoint" value="https://integrate.api.nvidia.com/v1/chat/completions">
+
+        <!-- Global API Key Link -->
+        <div class="ios-switch-row mt-md pt-md border-top">
+          <div class="switch-info">
+            <label class="switch-text-label">API Key Configuration</label>
+            <span class="sublabel">Managed via Top Navigation status button</span>
+          </div>
+          <button id="btnOpenApiConfigFromProfile" type="button" class="secondary" style="width: auto; padding: 6px 12px; font-size: 11px;">
+            🔑 Manage Key
+          </button>
+        </div>
+        <!-- Hidden input to maintain backward-compatibility if referenced -->
+        <input type="password" id="apiKey" style="display: none;" autocomplete="off">
       </div>
+    </details>
 
-      <div class="ios-switch-row" style="margin-top: 14px; padding-top: 10px; border-top: 0.5px solid var(--separator);">
-        <div class="switch-info">
-          <label class="switch-text-label" for="autoGenerate">Auto-generate suggestions</label>
-          <span class="sublabel">When a new message arrives</span>
+    <!-- 2. Persona & Instructions -->
+    <details class="settings-accordion" id="secPersonaSettings">
+      <summary class="accordion-summary">
+        <div class="accordion-summary-content">
+          <span class="accordion-summary-icon">🎭</span>
+          <span>Persona &amp; Instructions</span>
         </div>
-        <label class="switch-container">
-          <input type="checkbox" id="autoGenerate">
-          <span class="switch-slider"></span>
-        </label>
+        <span class="accordion-chevron"></span>
+      </summary>
+      <div class="accordion-body">
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 4px; margin-top: 6px;">
+          <button id="btnResetPrompt" type="button" class="link-btn" title="Reset prompt to default">Reset to Default</button>
+        </div>
+        <label class="field-label" for="customPrompt" style="margin-top: 0;">System Prompt</label>
+        <textarea id="customPrompt" style="min-height: 110px; font-size: 12px;"></textarea>
       </div>
-    </div>
-  </div>
+    </details>
 
-  <!-- Automation & Safety Group -->
-  <div class="section-group">
-    <div class="section-header">
-      <span>Automation &amp; Safety</span>
-    </div>
-
-    <div class="inset-card">
-      <div class="ios-switch-row">
-        <div class="switch-info">
-          <label class="switch-text-label" for="autoSend">Auto-send suggested reply</label>
-          <span class="sublabel">Automatically dispatches chosen reply</span>
+    <!-- 3. Generation Preferences -->
+    <details class="settings-accordion" id="secGenPreferences">
+      <summary class="accordion-summary">
+        <div class="accordion-summary-content">
+          <span class="accordion-summary-icon">⚙️</span>
+          <span>Generation Preferences</span>
         </div>
-        <label class="switch-container">
-          <input type="checkbox" id="autoSend">
-          <span class="switch-slider"></span>
-        </label>
-      </div>
+        <span class="accordion-chevron"></span>
+      </summary>
+      <div class="accordion-body">
+        <label class="field-label" for="tone">Tone Style</label>
+        <select id="tone">
+          <option value="Friendly and casual">Friendly and casual</option>
+          <option value="Funny and playful">Funny and playful</option>
+          <option value="Warm and thoughtful">Warm and thoughtful</option>
+          <option value="Short and direct">Short and direct</option>
+          <option value="Flirty but respectful">Flirty but respectful</option>
+          <option value="Chill and relaxed">Chill and relaxed</option>
+        </select>
 
-      <div class="row" style="margin-top: 14px;">
-        <div>
-          <label class="field-label" for="minDelayMs">Min Delay (ms)</label>
-          <input type="number" id="minDelayMs" value="2500" min="500" step="100">
+        <div class="row mt-sm">
+          <div>
+            <label class="field-label" for="contextTurns">Context Turns</label>
+            <input type="number" id="contextTurns" value="6" min="1" max="20">
+          </div>
+          <div>
+            <label class="field-label" for="maxChars">Max Characters</label>
+            <input type="number" id="maxChars" value="140" min="20" max="500">
+          </div>
         </div>
-        <div>
-          <label class="field-label" for="maxDelayMs">Max Delay (ms)</label>
-          <input type="number" id="maxDelayMs" value="6000" min="1000" step="100">
+
+        <div class="ios-switch-row mt-md pt-md border-top">
+          <div class="switch-info">
+            <label class="switch-text-label" for="autoGenerate">Auto-generate suggestions</label>
+            <span class="sublabel">When a new message arrives</span>
+          </div>
+          <label class="switch-container">
+            <input type="checkbox" id="autoGenerate">
+            <span class="switch-slider"></span>
+          </label>
         </div>
       </div>
+    </details>
 
-      <label class="field-label" for="maxSessionMessages" style="margin-top: 12px;">Max Messages Per Session</label>
-      <input type="number" id="maxSessionMessages" value="30" min="1" max="100">
+    <!-- 4. Automation & Safety -->
+    <details class="settings-accordion" id="secAutomationSettings">
+      <summary class="accordion-summary">
+        <div class="accordion-summary-content">
+          <span class="accordion-summary-icon">🛡️</span>
+          <span>Automation &amp; Safety</span>
+        </div>
+        <span class="accordion-chevron"></span>
+      </summary>
+      <div class="accordion-body">
+        <div class="ios-switch-row mt-xs">
+          <div class="switch-info">
+            <label class="switch-text-label" for="autoSend">Auto-send suggested reply</label>
+            <span class="sublabel">Automatically dispatches chosen reply</span>
+          </div>
+          <label class="switch-container">
+            <input type="checkbox" id="autoSend">
+            <span class="switch-slider"></span>
+          </label>
+        </div>
+
+        <div class="row mt-md">
+          <div>
+            <label class="field-label" for="minDelayMs">Min Delay (ms)</label>
+            <input type="number" id="minDelayMs" value="2500" min="500" step="100">
+          </div>
+          <div>
+            <label class="field-label" for="maxDelayMs">Max Delay (ms)</label>
+            <input type="number" id="maxDelayMs" value="6000" min="1000" step="100">
+          </div>
+        </div>
+
+        <label class="field-label" for="maxSessionMessages" class="mt-md">Max Messages Per Session</label>
+        <input type="number" id="maxSessionMessages" value="30" min="1" max="100">
+      </div>
+    </details>
+  </main>
+
+  <!-- API Configuration Popup Dialog -->
+  <dialog id="apiConfigDialog" class="api-dialog">
+    <div class="api-dialog-card">
+      <div class="api-dialog-header">
+        <div class="api-dialog-title-group">
+          <span class="api-dialog-icon">⚡</span>
+          <div>
+            <h2 class="api-dialog-title">API Connection</h2>
+            <p class="api-dialog-subtitle">Configure &amp; validate AI provider connection</p>
+          </div>
+        </div>
+        <button id="btnCloseApiDialog" type="button" class="dialog-close-btn" aria-label="Close API configuration">✕</button>
+      </div>
+
+      <!-- Live Connection & Validation Status Banner -->
+      <div class="popup-status-banner status-gray" id="popupStatusBanner">
+        <div class="popup-status-top">
+          <span class="status-indicator-dot" id="popupStatusDot"></span>
+          <span class="popup-status-title" id="popupStatusTitle">Checking connection…</span>
+        </div>
+        <p class="popup-status-desc" id="popupStatusDesc">Validating connection with active provider…</p>
+      </div>
+
+      <div class="api-dialog-body">
+        <!-- Active Provider Selection -->
+        <label class="field-label" for="popupProviderSelect" style="margin-top: 0;">AI Provider</label>
+        <select id="popupProviderSelect">
+          <option value="nvidia">NVIDIA NIM (Default)</option>
+          <option value="ollama">Ollama (Local: 127.0.0.1:11434)</option>
+          <option value="openai">OpenAI</option>
+          <option value="google">Google AI Studio (Gemini)</option>
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="groq">Groq (Ultra-fast)</option>
+          <option value="openrouter">OpenRouter</option>
+          <option value="custom">Custom / Local (LM Studio, etc.)</option>
+        </select>
+
+        <!-- API Key Input Field -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; margin-bottom: 4px;">
+          <label class="field-label" for="popupApiKey" id="popupApiKeyLabel" style="margin: 0;">NVIDIA NIM API Key</label>
+          <button id="btnClearPopupKey" type="button" class="link-btn" style="font-size: 11px; color: var(--label-secondary);">✕ Clear</button>
+        </div>
+        <div class="row" style="align-items: center; gap: 6px;">
+          <input type="password" id="popupApiKey" placeholder="nvapi-..." autocomplete="off" spellcheck="false" style="flex: 1;">
+          <button id="btnTogglePopupKeyVisibility" type="button" class="secondary" style="width: 38px; padding: 8px 0;" title="Toggle key visibility">👁️</button>
+        </div>
+        <span class="sublabel" id="popupKeyHint" style="display: block; margin-top: 4px; font-size: 11px; color: var(--label-tertiary);">
+          Stored securely in browser extension storage. Key is never exposed or logged.
+        </span>
+
+        <!-- Active Model & Endpoint summary -->
+        <div class="popup-connection-details mt-sm">
+          <div class="detail-row">
+            <span class="detail-label">Model:</span>
+            <span class="detail-value" id="popupModelDisplay">nvidia/nemotron-3-super-120b-a12b</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Endpoint:</span>
+            <span class="detail-value" id="popupEndpointDisplay">https://integrate.api.nvidia.com/v1/chat/completions</span>
+          </div>
+        </div>
+
+        <!-- Dynamic Feedback Alert -->
+        <div id="popupFeedbackMessage" class="popup-feedback" style="display: none;" role="alert"></div>
+
+        <!-- Action Buttons -->
+        <div class="btn-group mt-md">
+          <button id="btnTestPopupKey" type="button" class="secondary" style="flex: 1;">
+            🔍 Test Connection
+          </button>
+          <button id="btnSavePopupKey" type="button" style="flex: 1;">
+            ✓ Save &amp; Connect
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
+  </dialog>
 
+  <!-- Delete Profile Confirmation Modal Dialog -->
+  <dialog id="deleteProfileDialog" class="confirm-dialog">
+    <form method="dialog">
+      <h2 class="dialog-title">Delete Profile</h2>
+      <p class="dialog-body">Are you sure you want to delete profile "<span id="deleteProfileTargetName" style="color: var(--label-primary); font-weight: 600;"></span>"? This cannot be undone.</p>
+      <div class="dialog-actions">
+        <button value="cancel" type="submit" class="secondary">Cancel</button>
+        <button value="confirm" type="submit" class="danger">Delete</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="providers.js"></script>
   <script src="sidepanel.js"></script>
 </body>
 </html>
