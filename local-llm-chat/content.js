@@ -350,7 +350,7 @@
     if (incomingHash === lastIncomingHash) return;
     lastIncomingHash = incomingHash;
 
-    sendStatus({ platform: activeAdapter.name, incoming: incomingText, state: "NEW_MESSAGE" });
+    sendStatus({ platform: activeAdapter.name, incoming: incomingText, generated: "", state: "NEW_MESSAGE" });
 
     if (!settings.autoGenerate) return;
     if (isGenerating) return;
